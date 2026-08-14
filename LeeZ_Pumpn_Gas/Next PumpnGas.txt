@@ -1,0 +1,500 @@
+We are starting a new mod project for **7 Days to Die V3.1.0 b14** called:
+
+# LeeZ_Pumpn_Gas
+
+## Repository / branch
+
+* GitHub repo: `JpegIsHere/LeeZ-Mods`
+* Project folder: `LeeZ_Pumpn_Gas`
+* Working branch: `dev/pumpn-gas`
+* Initial project commit: `700e6bc1293ba320b44e432cd7fee40146fd25bf`
+
+The project already contains:
+
+`LeeZ_Pumpn_Gas/README.md`
+
+This README contains the initial design concept and research checklist.
+
+---
+
+# Core mod idea
+
+The goal is to make **fuel a valuable and strategically limited commodity**.
+
+At the moment, fuel in 7 Days to Die can be accumulated too easily.
+
+This mod should fundamentally change the fuel economy.
+
+Players should need to plan fuel collection, transport, storage and resupply.
+
+---
+
+# Portable fuel containers
+
+Fuel should primarily be carried in **tiered gas cans / jerry cans**.
+
+These containers should have limited storage capacities.
+
+Initial reference idea:
+
+* approximately **500 fuel units** for an early/basic can
+
+The final tier count and capacities are not decided yet.
+
+Possible future design:
+
+* T1 small/basic gas can
+* T2 medium can
+* T3 larger can
+* higher tiers with progressively greater storage
+
+Do not lock tier capacities until we have inspected the existing game balance.
+
+The preferred long-term design is a reusable fuel container that can hold a variable amount of fuel, rather than simply increasing normal gasoline stack size.
+
+---
+
+# Refuelling design
+
+Vehicles, generators and fuel-powered tools should eventually require fuel to be supplied from an appropriate portable gas can/container.
+
+The player should need to carry fuel with them when operating vehicles or fuel-powered equipment away from base.
+
+We need to investigate the existing V3.1 refuelling systems before deciding how to implement this.
+
+Do not assume XML alone will be sufficient.
+
+Harmony/runtime code may be necessary.
+
+---
+
+# Remove easy fuel production
+
+The intended design is:
+
+* **No crafting gasoline from oil shale.**
+* Remove/disable other easy fuel production paths where appropriate.
+* Players should not be able to harvest ordinary objects simply to create large quantities of usable gasoline.
+* Fuel should mostly enter the economy through finite world fuel repositories.
+
+We must first audit all current fuel creation/recovery sources before removing anything.
+
+---
+
+# World fuel repositories
+
+Gasoline should primarily be obtained from physical world locations.
+
+Primary source:
+
+* Gas station pumps
+
+Other possible sources:
+
+* fuel barrels
+* drums
+* service-station tanks
+* large fuel storage tanks
+* industrial tanks
+* other appropriate tank-style props already present in the game
+
+We need to identify every suitable V3.1 block, prefab or world prop before deciding which become functional fuel repositories.
+
+Each repository should have **finite fuel stock**.
+
+Initial reference value:
+
+* approximately **200 fuel units per working pump/tank**
+
+This value is provisional and will need balancing.
+
+---
+
+# Repository restocking
+
+Fuel repositories should replenish periodically.
+
+The intended concept is for fuel restocking to occur at roughly the same frequency as the **supply-drop aeroplane/event**.
+
+We need to inspect V3.1 and determine:
+
+* exact supply-drop scheduling
+* server settings affecting supply drops
+* whether there is an event/hook we can reuse
+* whether fuel should literally restock when the supply-drop event fires
+* or simply use the same interval
+
+This must work correctly in multiplayer and survive save/reload.
+
+---
+
+# Persistence
+
+Each fuel repository may need to remember:
+
+* current fuel quantity
+* maximum capacity
+* last refill/restock time
+* whether it has already been drained during the current restock cycle
+* destroyed/depleted state if applicable
+
+This state must survive:
+
+* save/reload
+* chunk unload/reload
+* server restart
+
+Multiplayer synchronization must be considered from the beginning.
+
+---
+
+# Important first task: V3.1 fuel audit
+
+Do NOT begin gameplay implementation yet.
+
+First, research the actual **7 Days to Die V3.1.0 b14** game data and code paths.
+
+Create a comprehensive reference inventory.
+
+## 1. Fuel items
+
+Find:
+
+* gasoline/fuel item IDs
+* display names
+* stack sizes
+* classes
+* tags
+* properties
+* inventory icons
+* model references if applicable
+
+Find everywhere gasoline is referenced.
+
+---
+
+## 2. Fuel recipes
+
+Find every recipe that can create gasoline/fuel.
+
+Especially:
+
+* oil shale → gasoline
+* chemistry station recipes
+* alternate recipes
+* perk/book/unlock dependencies
+* crafting modifiers
+
+Document exact XML IDs and source files.
+
+---
+
+## 3. Fuel from harvesting / scrapping
+
+Find every item/block that can produce gasoline through:
+
+* harvesting
+* dismantling
+* wrenching
+* scrapping
+* recipes
+* loot conversion
+* other mechanics
+
+Do not remove these yet.
+
+First produce the full list.
+
+---
+
+## 4. Fuel loot
+
+Find:
+
+* loot groups containing gasoline
+* containers capable of spawning gasoline
+* POI loot
+* vehicle-related loot
+* gas station loot
+* trader inventory references
+* quest or reward references if present
+
+Record probabilities/count ranges where practical.
+
+---
+
+## 5. Existing gas pumps and tanks
+
+Inventory all suitable world objects including:
+
+* gas pumps
+* station pumps
+* fuel barrels
+* drums
+* fuel tanks
+* industrial tanks
+* storage tanks
+* service-station objects
+* generators or similar fuel-looking repositories
+
+For each, record where possible:
+
+* block ID
+* prefab name
+* Unity model path
+* XML definition
+* whether it is a normal block, decoration, loot container, tile entity or prefab-only prop
+* harvest behavior
+* destroy behavior
+* current loot/container behavior
+
+---
+
+# Fuel images/assets
+
+I specifically want a reference audit of the **images and assets associated with gasoline/fuel in the game**.
+
+Find and document:
+
+* gasoline inventory icon
+* gas can / jerry can icons
+* gas can models
+* gasoline-related textures
+* gas pump models
+* gas pump textures
+* pump icons if any
+* barrel/drum assets
+* fuel tank assets
+* industrial tank assets
+* associated UI sprites where relevant
+
+Record exact internal/source paths whenever possible.
+
+If screenshots or reference images are useful, create a documented reference collection.
+
+Do not redistribute copyrighted game assets unnecessarily.
+
+Use screenshots/reference exports and paths where appropriate.
+
+---
+
+# Vehicle refuelling investigation
+
+Inspect how V3.1 currently handles:
+
+* vehicle fuel quantity
+* vehicle maximum fuel
+* refuelling interaction
+* gasoline item consumption
+* UI interaction
+* network synchronization
+* save persistence
+
+Identify the exact classes/methods involved.
+
+We need this before designing gas-can-only refuelling.
+
+---
+
+# Generator refuelling
+
+Inspect:
+
+* generator fuel storage
+* gasoline consumption
+* refuel interaction
+* tile entity state
+* network synchronization
+
+Determine how reusable gas cans could interact with generators.
+
+---
+
+# Fuel-powered tools
+
+Identify every tool/item that actually consumes gasoline or another compatible fuel resource.
+
+Determine whether these need the same gas-can system or a different interaction.
+
+Do not assume which tools use fuel—verify against V3.1 game data/code.
+
+---
+
+# Supply-drop system investigation
+
+Inspect the V3.1 supply-drop system.
+
+Find:
+
+* controlling class/methods
+* timing logic
+* server configuration
+* air-drop frequency settings
+* events/callbacks
+* multiplayer authority
+
+We want to know whether fuel-repository restocking can be safely tied to this system.
+
+---
+
+# Likely mod structure
+
+Eventually the project may include:
+
+`LeeZ_Pumpn_Gas/Config/items.xml`
+
+For:
+
+* gas cans
+* container items
+* fuel-related item changes
+
+`LeeZ_Pumpn_Gas/Config/recipes.xml`
+
+For:
+
+* disabling oil-shale gasoline production
+* gas-can crafting/progression if desired
+
+`LeeZ_Pumpn_Gas/Config/loot.xml`
+
+For:
+
+* gasoline loot removal/adjustment
+* approved world fuel sources
+
+`LeeZ_Pumpn_Gas/Config/blocks.xml`
+
+For:
+
+* gas pumps
+* tanks
+* functional world repositories
+
+`LeeZ_Pumpn_Gas/Config/progression.xml`
+
+For:
+
+* gas-can tier unlocks if progression-gated
+
+`LeeZ_Pumpn_Gas/Localization.txt`
+
+For:
+
+* item names
+* repository interaction text
+* descriptions
+
+Likely runtime DLL/Harmony code for:
+
+* variable gas-can contents
+* gas-can-only refuelling
+* finite pump/tank inventories
+* repository interactions
+* synchronized stock
+* timed restocking
+* persistence/network state
+
+---
+
+# Possible interaction design
+
+A world pump/tank could eventually offer interactions such as:
+
+* `Fill Gas Can`
+* display fuel remaining
+* reject interaction without a compatible can
+* report empty/depleted
+* refill after restock
+
+Example concept:
+
+`Fuel remaining: 137 / 200`
+
+Do not implement UI yet.
+
+First determine what interaction framework best fits V3.1.
+
+---
+
+# Questions to leave open until research
+
+Do not make permanent decisions yet about:
+
+* number of gas-can tiers
+* exact capacities
+* crafting requirements
+* whether cans can be repaired
+* whether cans lose durability
+* whether cans themselves can stack
+* whether one item stores variable fuel state
+* whether partially filled cans can stack
+* whether player-placed fuel storage exists
+* whether fuel can be transferred between cans
+* whether pumps share stock across an entire POI
+* whether each physical pump has independent fuel
+* whether destroyed pumps permanently lose their fuel
+* trader fuel availability
+* exact repository stock values
+* exact restock frequency
+* whether vehicle fuel consumption needs rebalance
+
+Research first.
+
+---
+
+# Design philosophy
+
+The purpose of this mod is not simply to make gasoline annoying.
+
+Fuel should become another strategic survival resource.
+
+The intended gameplay should encourage:
+
+* planning routes
+* locating gas stations
+* maintaining reserve fuel
+* deciding whether a trip is worth the gasoline
+* carrying emergency fuel
+* defending useful fuel locations
+* planning long journeys
+* using higher-tier containers as meaningful progression
+* periodically returning to known fuel repositories after restock
+
+Fuel scarcity should create decisions rather than busywork.
+
+---
+
+# First deliverable
+
+Start by researching the game and creating a document/table containing:
+
+* fuel item IDs
+* recipes
+* loot sources
+* harvesting/scrap sources
+* trader sources
+* vehicle fuel code
+* generator fuel code
+* applicable tool fuel code
+* every useful pump/tank/barrel block or prefab
+* icons
+* models
+* textures/asset paths
+* supply-drop scheduling system
+* likely runtime hooks
+
+Separate findings into:
+
+**Confirmed from V3.1**
+
+and
+
+**Design proposal**
+
+Do not mix assumptions with verified game data.
+
+Use **7 Days to Die V3.1.0 b14** as the authoritative target.
+
+Once that audit is complete, we can design the actual implementation architecture and gas-can tier system.
+
